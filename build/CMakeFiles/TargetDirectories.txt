@@ -1,3 +1,0 @@
-/home/codebind/cpp/deribit-system/build/CMakeFiles/TradingApp.dir
-/home/codebind/cpp/deribit-system/build/CMakeFiles/edit_cache.dir
-/home/codebind/cpp/deribit-system/build/CMakeFiles/rebuild_cache.dir
