@@ -2,6 +2,7 @@
 #include "websocket.h"
 #include <iostream>
 #include <unordered_map>
+#include "json.hpp"
 
 TradingLogic::TradingLogic(ThreadPool &pool, WebSocketHandler &websocket)
     : thread_pool(pool), websocket(websocket) {}
@@ -121,7 +122,7 @@ void TradingLogic::cancelOrder(const std::string &order_id)
 
 void TradingLogic::modifyOrder(const std::string &order_id, double price, double amount)
 {
-    json payload = {
+    nlohmann::json payload = {
         {"method", "private/edit"},
         {"params", {{"order_id", order_id}, {"price", price}, {"amount", amount}}}};
     websocket.sendMessage(payload);

@@ -1,6 +1,7 @@
 #include "websocket.h"
 #include <iostream>
 #include "latency.h"
+#include "json.hpp"
 
 WebSocketHandler::WebSocketHandler(const std::string &host, const std::string &port, const std::string &endpoint)
     : ctx_(ssl::context::tlsv12_client),
@@ -36,12 +37,19 @@ void WebSocketHandler::connect()
     }
 }
 
+void WebSocketHandler::inMessage(const std::string &msg)
+{
+    json data = json::parse(msg);
+}
+
 void WebSocketHandler::sendMessage(const json &message)
 {
     try
     {
-        // Serialize the JSON message and send it
+        // Convert JSON message to string
         std::string message_str = message.dump();
+
+        // Send the message through websocket
         websocket_.write(asio::buffer(message_str));
 
         std::cout << "Sent message: " << message_str << std::endl;

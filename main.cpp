@@ -6,11 +6,12 @@
 #include "trade.h"
 #include "threads.h"
 #include "websocket.h"
+#include "json.hpp"
 
 // Function to parse the .env file
-std::map<std::string, std::string> loadEnvFile(const std::string &filePath = ".env")
+std::map<std::string, std::string> loadEnvFile(const std::string &filePath = "../.env")
 {
-    std::map<std::string, std::string> envMap;
+    std::map<std::string, std::string> envMap ;
     std::ifstream file(filePath);
 
     if (!file.is_open())

@@ -4,36 +4,38 @@
 
 #include <boost/beast.hpp>
 #include <boost/asio.hpp>
-#include <boost/asio/ssl.hpp>
-#include <nlohmann/json.hpp>
 #include <openssl/ssl.h>
 #include <boost/beast/websocket.hpp>
 #include <boost/beast/ssl.hpp>
+#include <boost/asio/ssl.hpp>
+#include "json.hpp"
 #include <boost/beast/core.hpp>
+
 #include <string>
 
-namespace beast = boost::beast;
 namespace asio = boost::asio;
+namespace beast = boost::beast;
 namespace ssl = asio::ssl;
-using tcp = asio::ip::tcp;
 using json = nlohmann::json;
+using tcp = asio::ip::tcp;
 
 class WebSocketHandler
 {
 public:
     WebSocketHandler(const std::string &host, const std::string &port, const std::string &endpoint);
     void connect();
+    void inMessage(const std::string &msg);
     void sendMessage(const json &message);
     json readMessage();
     void close();
 
 private:
     asio::io_context ioc_;
-    ssl::context ctx_;
-    tcp::resolver resolver_;
-    beast::websocket::stream<ssl::stream<tcp::socket>> websocket_;
-    std::string host_;
     std::string endpoint_;
+    tcp::resolver resolver_;
+    std::string host_;
+    ssl::context ctx_;
+    beast::websocket::stream<ssl::stream<tcp::socket>> websocket_;
 };
 
 #endif // WEBSOCKET_H
