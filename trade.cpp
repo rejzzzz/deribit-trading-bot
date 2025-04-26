@@ -43,8 +43,9 @@ void TradingLogic::executeTrades()
                 std::cout << "Enter price: ";
                 std::cin >> price;
 
-                thread_pool.submit([this, instrument_name, amount, price]()
-                                   { placeOrder(instrument_name, amount, price); }, true); // Mark as critical
+                auto future = thread_pool.submit([this, instrument_name, amount, price]()
+                                                 { placeOrder(instrument_name, amount, price); }, true);
+                future.get(); // Wait for the task to complete
                 break;
             }
             case 2:
@@ -53,8 +54,9 @@ void TradingLogic::executeTrades()
                 std::cout << "Enter order ID to cancel: ";
                 std::cin >> order_id;
 
-                thread_pool.submit([this, order_id]()
-                                   { cancelOrder(order_id); }, true); // Mark as critical
+                auto future = thread_pool.submit([this, order_id]()
+                                                 { cancelOrder(order_id); }, true);
+                future.get(); // Wait for the task to complete
                 break;
             }
             case 3:
@@ -68,8 +70,9 @@ void TradingLogic::executeTrades()
                 std::cout << "Enter new amount: ";
                 std::cin >> amount;
 
-                thread_pool.submit([this, order_id, price, amount]()
-                                   { modifyOrder(order_id, price, amount); }, true); // Mark as critical
+                auto future = thread_pool.submit([this, order_id, price, amount]()
+                                                 { modifyOrder(order_id, price, amount); }, true);
+                future.get(); // Wait for the task to complete
                 break;
             }
             case 4:
@@ -78,18 +81,20 @@ void TradingLogic::executeTrades()
                 std::cout << "Enter instrument name to view order book (e.g., BTC-PERPETUAL): ";
                 std::cin >> instrument_name;
 
-                thread_pool.submit([this, instrument_name]()
-                                   {
+                auto future = thread_pool.submit([this, instrument_name]()
+                                                 {
                     auto order_book = getOrderBook(instrument_name);
                     std::cout << "Order Book: " << order_book.dump(4) << std::endl; });
+                future.get(); // Wait for the task to complete
                 break;
             }
             case 5:
             { // View Current Positions
-                thread_pool.submit([this]()
-                                   {
+                auto future = thread_pool.submit([this]()
+                                                 {
                     auto positions = getPositions();
                     std::cout << "Current Positions: " << positions.dump(4) << std::endl; });
+                future.get(); // Wait for the task to complete
                 break;
             }
             default:
@@ -110,6 +115,10 @@ void TradingLogic::placeOrder(const std::string &instrument_name, double amount,
         {"method", "private/buy"},
         {"params", {{"instrument_name", instrument_name}, {"amount", amount}, {"price", price}, {"type", "limit"}}}};
     websocket.sendMessage(payload);
+
+    // Wait for and display the server response
+    json response = websocket.readMessage();
+    std::cout << "\nServer response: " << response.dump(4) << std::endl;
 }
 
 void TradingLogic::cancelOrder(const std::string &order_id)
@@ -118,6 +127,10 @@ void TradingLogic::cancelOrder(const std::string &order_id)
         {"method", "private/cancel"},
         {"params", {{"order_id", order_id}}}};
     websocket.sendMessage(payload);
+
+    // Wait for and display the server response
+    json response = websocket.readMessage();
+    std::cout << "\nServer response: " << response.dump(4) << std::endl;
 }
 
 void TradingLogic::modifyOrder(const std::string &order_id, double price, double amount)
@@ -126,6 +139,10 @@ void TradingLogic::modifyOrder(const std::string &order_id, double price, double
         {"method", "private/edit"},
         {"params", {{"order_id", order_id}, {"price", price}, {"amount", amount}}}};
     websocket.sendMessage(payload);
+
+    // Wait for and display the server response
+    json response = websocket.readMessage();
+    std::cout << "\nServer response: " << response.dump(4) << std::endl;
 }
 
 nlohmann::json TradingLogic::getOrderBook(const std::string &instrument_name)
